@@ -1,0 +1,200 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: #0a0a1a;
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  color: #e0e0e0;
+  overflow: hidden;
+  height: 100vh;
+}
+
+#root {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+/* ── Header ── */
+.header {
+  padding: 20px 30px;
+  background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3e 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  flex-shrink: 0;
+}
+
+.header h1 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  background: linear-gradient(90deg, #60a5fa, #a78bfa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 4px;
+}
+
+.header p {
+  font-size: 0.85rem;
+  color: #888;
+}
+
+/* ── Bubble Canvas ── */
+.bubble-canvas {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  background: radial-gradient(ellipse at center, #0f0f2e 0%, #0a0a1a 70%);
+}
+
+.bubble {
+  position: absolute;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.9);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+  cursor: default;
+  transition: transform 0.15s ease;
+  animation: float-in 0.4s ease-out;
+}
+
+.bubble:hover {
+  transform: scale(1.2);
+  z-index: 100;
+}
+
+.bubble::after {
+  content: attr(data-pod);
+  position: absolute;
+  bottom: -18px;
+  font-size: 0.55rem;
+  color: rgba(255, 255, 255, 0.4);
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.bubble:hover::after {
+  opacity: 1;
+}
+
+@keyframes float-in {
+  from {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ── Stats Panel ── */
+.stats-panel {
+  padding: 16px 30px;
+  background: #0d0d22;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+
+.version-legend {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.version-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+}
+
+.version-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.version-label {
+  color: #ccc;
+}
+
+.version-count {
+  color: #888;
+  font-size: 0.75rem;
+}
+
+/* ── Traffic Bar ── */
+.traffic-bar-container {
+  flex: 1;
+  min-width: 200px;
+}
+
+.traffic-bar-label {
+  font-size: 0.7rem;
+  color: #888;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.traffic-bar {
+  height: 8px;
+  background: #1a1a3e;
+  border-radius: 4px;
+  overflow: hidden;
+  display: flex;
+}
+
+.traffic-segment {
+  height: 100%;
+  transition: width 0.5s ease;
+}
+
+/* ── Status ── */
+.status-info {
+  font-size: 0.75rem;
+  color: #888;
+  text-align: right;
+  min-width: 120px;
+}
+
+.status-info .total {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #e0e0e0;
+}
+
+/* ── Connection Error ── */
+.error-banner {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(220, 38, 38, 0.9);
+  color: white;
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  z-index: 1000;
+  backdrop-filter: blur(10px);
+}

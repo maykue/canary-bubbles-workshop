@@ -1,0 +1,31 @@
+# ============================================================
+# ArgoCD Application — Frontend
+# ============================================================
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: canary-bubbles-frontend
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+
+  source:
+    # WORKSHOP: Replace with YOUR repository URL
+    repoURL: https://github.com/YOUR_GITHUB_USERNAME/canary-bubbles-workshop.git
+    targetRevision: main
+    path: k8s
+    directory:
+      include: "{namespace.yaml,frontend-*.yaml}"
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: canary-bubbles
+
+  syncPolicy:
+    automated:
+      selfHeal: true
+      prune: true
+    syncOptions:
+      - CreateNamespace=true

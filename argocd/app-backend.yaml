@@ -1,0 +1,43 @@
+# ============================================================
+# ArgoCD Application — Backend
+# ============================================================
+# This tells ArgoCD to watch the k8s/ folder in our GitHub repo
+# and automatically sync changes to the cluster.
+#
+# When you push a commit that changes the backend image tag
+# in backend-rollout.yaml, ArgoCD detects the change and
+# applies it → Argo Rollouts kicks off the canary process!
+# ============================================================
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: canary-bubbles-backend
+  namespace: argocd
+  # This finalizer ensures the app's resources get cleaned up
+  # when you delete the Application from ArgoCD
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+
+  source:
+    # WORKSHOP: Replace with YOUR repository URL
+    repoURL: https://github.com/YOUR_GITHUB_USERNAME/canary-bubbles-workshop.git
+    targetRevision: main
+    path: k8s
+    # Only include backend-related manifests
+    directory:
+      include: "{namespace.yaml,backend-*.yaml}"
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: canary-bubbles
+
+  syncPolicy:
+    automated:
+      # Auto-sync when git changes are detected
+      selfHeal: true
+      # Auto-create the namespace if it doesn't exist
+      prune: true
+    syncOptions:
+      - CreateNamespace=true

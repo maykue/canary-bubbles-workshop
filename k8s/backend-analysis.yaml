@@ -1,0 +1,34 @@
+# ============================================================
+# AnalysisTemplate — Backend Health Check
+# ============================================================
+# This template defines HOW Argo Rollouts verifies the canary
+# is healthy enough to continue the rollout.
+#
+# It works by:
+#   1. Making an HTTP GET request to the canary's health endpoint
+#   2. If the response is 200 OK, the analysis PASSES
+#   3. If it fails, the analysis FAILS and the rollout rolls back
+#
+# This is deliberately simple for the workshop. In production,
+# you might check Prometheus metrics (error rate, latency, etc.)
+# ============================================================
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: backend-health-check
+  namespace: canary-bubbles
+spec:
+  metrics:
+    - name: health-check
+      # How often to run the check
+      interval: 10s
+      # Must succeed this many times
+      successCondition: result == "healthy"
+      # Fail after this many failures
+      failureLimit: 3
+      provider:
+        web:
+          # Hit the canary service's health endpoint
+          url: http://backend-canary.canary-bubbles.svc.cluster.local:8000/api/health
+          # We expect a JSON response with {"status": "healthy"}
+          jsonPath: "{$.status}"

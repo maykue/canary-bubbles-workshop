@@ -1,0 +1,105 @@
+# ============================================================
+# Argo Rollout — Backend (Canary Strategy)
+# ============================================================
+# This is the STAR of the workshop. Instead of a regular Deployment,
+# we use an Argo Rollout resource that supports canary releases.
+#
+# How it works:
+#   1. When you change the image tag (e.g., v1.0.0 → v2.0.0),
+#      Argo Rollouts creates a NEW ReplicaSet (canary) alongside
+#      the existing one (stable).
+#   2. Traffic is gradually shifted from stable → canary
+#      based on the steps defined below.
+#   3. At each step, the AnalysisTemplate runs a health check.
+#      If it passes, the rollout continues. If it fails, it rolls back.
+#   4. On the frontend, you'll see bubble colors gradually change
+#      from the old version's color to the new version's color!
+# ============================================================
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: backend
+  namespace: canary-bubbles
+  labels:
+    app: backend
+spec:
+  replicas: 5
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+        - name: backend
+          # WORKSHOP: Change this image tag to trigger a canary rollout!
+          # v1.0.0 = Blue (#3498db)
+          # v2.0.0 = Green (#2ecc71)
+          # v3.0.0 = Orange (#e67e22)
+          image: ghcr.io/YOUR_GITHUB_USERNAME/canary-bubbles-backend:v1.0.0
+          ports:
+            - containerPort: 8000
+          env:
+            - name: APP_VERSION
+              value: "1.0.0"
+            - name: APP_COLOR
+              value: "#3498db"
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+  strategy:
+    canary:
+      # ── Canary steps ──
+      # Each step gradually increases the canary's share of traffic.
+      # Between steps, an analysis runs to verify the canary is healthy.
+      steps:
+        # Step 1: Send 20% of traffic to the new version
+        - setWeight: 20
+        - pause: { duration: 30s }
+        - analysis:
+            templates:
+              - templateName: backend-health-check
+
+        # Step 2: Increase to 40%
+        - setWeight: 40
+        - pause: { duration: 30s }
+        - analysis:
+            templates:
+              - templateName: backend-health-check
+
+        # Step 3: Increase to 60%
+        - setWeight: 60
+        - pause: { duration: 30s }
+
+        # Step 4: Increase to 80%
+        - setWeight: 80
+        - pause: { duration: 30s }
+        - analysis:
+            templates:
+              - templateName: backend-health-check
+
+        # Step 5: Full promotion — 100% goes to new version!
+
+      # The canary service receives canary traffic
+      canaryService: backend-canary
+      # The stable service receives stable traffic
+      stableService: backend-stable

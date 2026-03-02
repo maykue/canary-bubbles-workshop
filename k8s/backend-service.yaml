@@ -1,0 +1,63 @@
+# ============================================================
+# Backend Services
+# ============================================================
+# We create THREE services:
+#
+# 1. backend-service  — The "main" service the frontend uses.
+#                        Routes to ALL backend pods (stable + canary).
+#
+# 2. backend-stable   — Points ONLY to stable (old version) pods.
+#                        Used by Argo Rollouts internally.
+#
+# 3. backend-canary   — Points ONLY to canary (new version) pods.
+#                        Used by Argo Rollouts internally.
+#
+# The frontend's nginx proxy hits "backend-service", which
+# load-balances across ALL pods. Since Argo Rollouts controls
+# how many pods are stable vs canary, the ratio of bubble colors
+# on the frontend directly reflects the canary weight!
+# ============================================================
+
+# Main service — used by the frontend
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service
+  namespace: canary-bubbles
+spec:
+  selector:
+    app: backend
+  ports:
+    - port: 8000
+      targetPort: 8000
+      protocol: TCP
+
+---
+# Stable service — managed by Argo Rollouts
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-stable
+  namespace: canary-bubbles
+spec:
+  selector:
+    app: backend
+  ports:
+    - port: 8000
+      targetPort: 8000
+      protocol: TCP
+
+---
+# Canary service — managed by Argo Rollouts
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-canary
+  namespace: canary-bubbles
+spec:
+  selector:
+    app: backend
+  ports:
+    - port: 8000
+      targetPort: 8000
+      protocol: TCP
