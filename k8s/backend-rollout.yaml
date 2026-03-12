@@ -18,93 +18,93 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Rollout
 metadata:
-  name: backend
-  namespace: canary-bubbles
-  labels:
-    app: backend
+name: backend
+namespace: canary-bubbles
+labels:
+  app: backend
 spec:
-  replicas: 5
-  revisionHistoryLimit: 3
-  selector:
-    matchLabels:
+replicas: 5
+revisionHistoryLimit: 3
+selector:
+  matchLabels:
+    app: backend
+template:
+  metadata:
+    labels:
       app: backend
-  template:
-    metadata:
-      labels:
-        app: backend
-    spec:
-      # Needed to pull private images from GHCR (fixes 401 Unauthorized)
-      imagePullSecrets:
-        - name: ghcr-creds
+  spec:
+    # Needed to pull private images from GHCR (fixes 401 Unauthorized)
+    imagePullSecrets:
+      - name: ghcr-creds
 
-      containers:
-        - name: backend
-          # WORKSHOP: Change this image tag to trigger a canary rollout!
-          # v1.0.0 = Blue (#3498db)
-          # v2.0.0 = Green (#2ecc71)
-          # v3.0.0 = Orange (#e67e22)
-          image: ghcr.io/maykue/canary-bubbles-backend:v1.0.0
-          ports:
-            - containerPort: 8000
-          env:
-            - name: APP_VERSION
-              value: "1.0.0"
-            - name: APP_COLOR
-              value: "#b30ac9"
-          resources:
-            requests:
-              cpu: 50m
-              memory: 64Mi
-            limits:
-              cpu: 200m
-              memory: 128Mi
-          readinessProbe:
-            httpGet:
-              path: /api/health
-              port: 8000
-            initialDelaySeconds: 5
-            periodSeconds: 5
-          livenessProbe:
-            httpGet:
-              path: /api/health
-              port: 8000
-            initialDelaySeconds: 10
-            periodSeconds: 10
+    containers:
+      - name: backend
+        # WORKSHOP: Change this image tag to trigger a canary rollout!
+        # v1.0.0 = Blue (#3498db)
+        # v2.0.0 = Green (#2ecc71)
+        # v3.0.0 = Orange (#e67e22)
+        image: ghcr.io/maykue/canary-bubbles-backend:v1.0.0
+        ports:
+          - containerPort: 8000
+        env:
+          - name: APP_VERSION
+            value: "1.0.0"
+          - name: APP_COLOR
+            value: "#b30ac9"
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: 200m
+            memory: 128Mi
+        readinessProbe:
+          httpGet:
+            path: /api/health
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /api/health
+            port: 8000
+          initialDelaySeconds: 10
+          periodSeconds: 10
 
-  strategy:
-    canary:
-      # ── Canary steps ──
-      # Each step gradually increases the canary's share of traffic.
-      # Between steps, an analysis runs to verify the canary is healthy.
-      steps:
-        # Step 1: Send 20% of traffic to the new version
-        - setWeight: 20
-        - pause: { duration: 30s }
-        - analysis:
-            templates:
-              - templateName: backend-health-check
+strategy:
+  canary:
+    # ── Canary steps ──
+    # Each step gradually increases the canary's share of traffic.
+    # Between steps, an analysis runs to verify the canary is healthy.
+    steps:
+      # Step 1: Send 20% of traffic to the new version
+      - setWeight: 20
+      - pause: { duration: 30s }
+      - analysis:
+          templates:
+            - templateName: backend-health-check
 
-        # Step 2: Increase to 40%
-        - setWeight: 40
-        - pause: { duration: 30s }
-        - analysis:
-            templates:
-              - templateName: backend-health-check
+      # Step 2: Increase to 40%
+      - setWeight: 40
+      - pause: { duration: 30s }
+      - analysis:
+          templates:
+            - templateName: backend-health-check
 
-        # Step 3: Increase to 60%
-        - setWeight: 60
-        - pause: { duration: 30s }
+      # Step 3: Increase to 60%
+      - setWeight: 60
+      - pause: { duration: 30s }
 
-        # Step 4: Increase to 80%
-        - setWeight: 80
-        - pause: { duration: 30s }
-        - analysis:
-            templates:
-              - templateName: backend-health-check
+      # Step 4: Increase to 80%
+      - setWeight: 80
+      - pause: { duration: 30s }
+      - analysis:
+          templates:
+            - templateName: backend-health-check
 
-        # Step 5: Full promotion — 100% goes to new version!
+      # Step 5: Full promotion — 100% goes to new version!
 
-      # The canary service receives canary traffic
-      canaryService: backend-canary
-      # The stable service receives stable traffic
-      stableService: backend-stable
+    # The canary service receives canary traffic
+    canaryService: backend-canary
+    # The stable service receives stable traffic
+    stableService: backend-stable
