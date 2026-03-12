@@ -39,14 +39,14 @@ spec:
           # v1.0.0 = Blue (#3498db)
           # v2.0.0 = Green (#2ecc71)
           # v3.0.0 = Orange (#e67e22)
-          image: ghcr.io/maykue/canary-bubbles-backend:v1.0.0
+          image: ghcr.io/maykue/canary-bubbles-backend:v2.0.0
           ports:
             - containerPort: 8000
           env:
             - name: APP_VERSION
-              value: "1.0.0"
+              value: "2.0.0"
             - name: APP_COLOR
-              value: "#b30ac9"
+              value: "#baf5ee"
           resources:
             requests:
               cpu: 50m
