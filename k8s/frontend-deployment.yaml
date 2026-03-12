@@ -24,7 +24,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: ghcr.io/YOUR_GITHUB_USERNAME/canary-bubbles-frontend:v1.0.0
+          image: ghcr.io/maykue/canary-bubbles-frontend:v1.0.0
           ports:
             - containerPort: 80
           resources:

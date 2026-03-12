@@ -33,10 +33,6 @@ spec:
       labels:
         app: backend
     spec:
-      # Needed to pull private images from GHCR (fixes 401 Unauthorized)
-      imagePullSecrets:
-        - name: ghcr-creds
-
       containers:
         - name: backend
           # WORKSHOP: Change this image tag to trigger a canary rollout!
@@ -70,7 +66,6 @@ spec:
               port: 8000
             initialDelaySeconds: 10
             periodSeconds: 10
-
   strategy:
     canary:
       # ── Canary steps ──

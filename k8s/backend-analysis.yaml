@@ -22,6 +22,7 @@ spec:
     - name: health-check
       # How often to run the check
       interval: 10s
+      count: 3
       # Must succeed this many times
       successCondition: result == "healthy"
       # Fail after this many failures
